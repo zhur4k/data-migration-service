@@ -33,6 +33,9 @@ public class PatientNote {
     @Column(length = 4000)
     private String note;
 
+    @Column(nullable = false)
+    private String oldGuid;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", foreignKey = @ForeignKey(name = "fk_pat_note_to_patient"))
     private PatientProfile patient;

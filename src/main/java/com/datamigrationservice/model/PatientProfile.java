@@ -18,8 +18,6 @@ public class PatientProfile {
 
     private String lastName;
 
-    private String oldClientGuid;
-
     @Column(nullable = false)
     private Short statusId;
 }

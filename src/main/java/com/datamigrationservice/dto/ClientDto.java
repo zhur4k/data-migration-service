@@ -13,7 +13,7 @@ public record ClientDto(
 
         String lastName,
 
-        String status,
+        Short status,
 
         LocalDate dob,
 

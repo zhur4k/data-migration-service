@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    password: ${DB_PASSWORD}
+    username: ${DB_USERNAME}
+  jpa:
+    hibernate:
+      ddl-auto: validate

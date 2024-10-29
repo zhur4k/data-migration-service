@@ -1,0 +1,24 @@
+services:
+  data_migration_postgres:
+    image: postgres:17
+    environment:
+      - POSTGRES_DB=data_migration_db
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=username
+    ports:
+      - 5432:5432
+    networks:
+      - app-network
+  data_migration_service:
+    build: .
+    environment:
+      - DB_URL=jdbc:postgresql://host.docker.internal:5432/data_migration_db
+      - DB_USERNAME=username
+      - DB_PASSWORD=password
+    depends_on:
+      - data_migration_postgres
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge

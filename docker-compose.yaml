@@ -15,6 +15,7 @@ services:
       - DB_URL=jdbc:postgresql://host.docker.internal:5432/data_migration_db
       - DB_USERNAME=username
       - DB_PASSWORD=password
+      - LEGACY_URL=https://mail.google.com
     depends_on:
       - data_migration_postgres
     networks:

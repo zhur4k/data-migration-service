@@ -20,7 +20,7 @@ public class LegacySystemClientServiceImpl implements LegacySystemClientService 
 
     private final RestTemplate restTemplate;
 
-    @Value("legacy.url")
+    @Value("${legacy.url}")
     private String legacyURL;
 
     @Override

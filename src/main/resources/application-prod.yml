@@ -7,4 +7,6 @@ spring:
     hibernate:
       ddl-auto: validate
 legacy:
-  url: ${legacy.url}
+  url: ${LEGACY_URL}
+server:
+  port: 8080

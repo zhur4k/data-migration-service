@@ -7,4 +7,6 @@ spring:
     hibernate:
       ddl-auto: validate
 legacy:
-  url: http://localhost:3000
+  url: http://localhost:8081/api
+server:
+  port: 8080

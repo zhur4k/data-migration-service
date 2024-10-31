@@ -46,7 +46,7 @@ public class ImportServiceImpl implements ImportService {
         try{
             legacySystemClientService.getAllClients()
                     .forEach(client -> processClientData(client, statistic));
-
+            statistic.end();
             statistic.logStatistics();
             log.error("Data import process completed successfully.");
         }catch(Exception e){
@@ -110,8 +110,9 @@ public class ImportServiceImpl implements ImportService {
                     log.info("Created new user with login: {}", noteDto.loggedUser());
                     return companyUser;
                 });
-        if(checkExistNotesAndProcessExisted(patientNotes, noteDto, user, statistic)){
+        if(patientNotes != null && checkExistNotesAndProcessExisted(patientNotes, noteDto, user, statistic)){
             log.info("Note with GUID {} already exists and is up-to-date.", noteDto.guid());
+            statistic.incrementNoteProcessed();
             return;
         }
 
@@ -125,6 +126,7 @@ public class ImportServiceImpl implements ImportService {
         patientNote.setPatient(profile);
         patientNoteRepository.save(patientNote);
 
+        statistic.incrementNoteProcessed();
         statistic.incrementNoteCreated();
         log.info("Saved new note with GUID {}", noteDto.guid());
     }
@@ -148,7 +150,7 @@ public class ImportServiceImpl implements ImportService {
                 patientNote.setNote(noteDto.comments());
                 patientNoteRepository.save(patientNote);
 
-                statistic.incrementNoteCreated();
+                statistic.incrementNoteUpdated();
                 log.info("Updated existing note with GUID {}", noteDto.guid());
                 return true;
             }

@@ -15,6 +15,8 @@ public interface ImportService {
 
     void processClientData(ClientDto clientDto, ImportStatisticService statistic);
 
+    PatientProfile findMatchingPatientForClient(ClientDto clientDto);
+
     void processClientNote(NoteDto noteDto, PatientProfile profile, List<PatientNote> patientNotes, ImportStatisticService statistic);
 
     boolean checkExistNotesAndProcessExisted(List<PatientNote> patientNotes, NoteDto noteDto, CompanyUser user, ImportStatisticService statistic);

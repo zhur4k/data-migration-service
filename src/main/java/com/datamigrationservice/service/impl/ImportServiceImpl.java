@@ -18,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,46 +60,67 @@ public class ImportServiceImpl implements ImportService {
     @Override
     public void processClientData(ClientDto clientDto, ImportStatisticService statistic){
         try {
-            log.info("Start process client with GUID: {}", clientDto.guid());
+            log.info("Start processing client with GUID: {}", clientDto.guid());
             PatientProfile profile;
-            List<PatientNote> patientNotes;
-            Optional<PatientProfile> patientProfile = patientOldGuidRepository.findPatientProfileByOldGuid(clientDto.guid());
+            List<PatientNote> patientNotes = new ArrayList<>();
 
-            if(patientProfile.isPresent()){
+            Optional<PatientProfile> patientProfile = patientOldGuidRepository.findPatientProfileByOldGuid(clientDto.guid());
+            if (patientProfile.isPresent()) {
                 profile = patientProfile.get();
                 if (!List.of((short) 200, (short) 210, (short) 230).contains(profile.getStatusId())) {
-                    short currentStatus = patientProfile.get().getStatusId();
-                    log.warn("Inactive profile for client GUID: {}. Current status is {}. Required status: 200, 210, or 230. Skipping profile creation.",
+                    short currentStatus = profile.getStatusId();
+                    log.warn("Inactive profile for client GUID: {}. Current status is {}. Required status: 200, 210, or 230. Skipping processing.",
                             clientDto.guid(), currentStatus);
                     return;
                 }
                 patientNotes = patientNoteRepository.findAllByPatient(profile);
-            }else{
-                profile = new PatientProfile();
-                profile.setFirstName(clientDto.firstName());
-                profile.setLastName(clientDto.lastName());
-                profile.setStatusId(clientDto.status());
-                patientProfileRepository.save(profile);
+            } else {
+                profile = findMatchingPatientForClient(clientDto);
+                if (profile == null) {
+                    profile = new PatientProfile();
+                    profile.setFirstName(clientDto.firstName());
+                    profile.setLastName(clientDto.lastName());
+                    profile.setStatusId(clientDto.status());
+                    profile.setDob(clientDto.dob());
+                    patientProfileRepository.save(profile);
 
-                PatientOldGuid patientOldGuid = new PatientOldGuid();
-                patientOldGuid.setOldGuid(clientDto.guid());
-                patientOldGuid.setPatient(profile);
-                patientOldGuidRepository.save(patientOldGuid);
+                    PatientOldGuid patientOldGuid = new PatientOldGuid();
+                    patientOldGuid.setOldGuid(clientDto.guid());
+                    patientOldGuid.setPatient(profile);
+                    patientOldGuidRepository.save(patientOldGuid);
 
-                statistic.incrementProfileCreated();
-                log.info("Created new PatientProfile for client with guid: {}", clientDto.guid());
-                patientNotes = null;
+                    statistic.incrementProfileCreated();
+                    log.info("Created new PatientProfile for client with GUID: {}", clientDto.guid());
+                    patientNotes = Collections.emptyList();
+                }
             }
-            statistic.incrementClientProcessed();
-            log.error("Finished processing client with GUID: {}", clientDto.guid());
 
+            statistic.incrementClientProcessed();
+            log.info("Finished processing client with GUID: {}", clientDto.guid());
+
+            PatientProfile finalProfile = profile;
+            List<PatientNote> finalPatientNotes1 = patientNotes;
             legacySystemClientService.getClientNotes(
                             clientDtoToClientNotesRequestDtoMapper.apply(clientDto))
-                    .forEach(noteDto -> processClientNote(noteDto, profile, patientNotes, statistic));
+                    .forEach(noteDto -> processClientNote(noteDto, finalProfile, finalPatientNotes1, statistic));
 
-        }catch (Exception ex){
+        } catch (Exception ex) {
             log.error("Failed to process client with GUID: {}", clientDto.guid(), ex);
         }
+    }
+
+    @Override
+    public PatientProfile findMatchingPatientForClient(ClientDto clientDto){
+
+        Optional<PatientProfile> optional = patientProfileRepository.findByDob(clientDto.dob());
+        if(optional.isPresent()){
+            PatientProfile profile = optional.get();
+            if(profile.getFirstName().equals(clientDto.firstName()) &&
+            profile.getLastName().equals(clientDto.lastName())){
+                return profile;
+            }
+        }
+        return null;
     }
 
     @Override

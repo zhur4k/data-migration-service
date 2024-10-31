@@ -15,8 +15,6 @@ public class ImportStatisticService implements StatisticService {
 
     private int totalProfileCreated = 0;
 
-    private int totalProfileUpdated = 0;
-
     private int totalNoteProcessed = 0;
 
     private int totalNoteCreated = 0;
@@ -35,10 +33,6 @@ public class ImportStatisticService implements StatisticService {
         totalProfileCreated++;
     }
 
-    public void incrementProfileUpdated() {
-        totalProfileUpdated++;
-    }
-
     public void incrementNoteProcessed() {
         totalNoteProcessed++;
     }
@@ -50,7 +44,6 @@ public class ImportStatisticService implements StatisticService {
     public void incrementNoteUpdated() {
         totalNoteUpdated++;
     }
-
 
     @Override
     public void start() {
@@ -68,22 +61,20 @@ public class ImportStatisticService implements StatisticService {
                         Import statics:
                         Clients processed: {},
                         Profile created: {},
-                        Profile updated: {},
                         Note processed: {},
                         Note created: {},
-                        NOte updated: {},
+                        Note updated: {},
                         Start at: {},
-                        End at: {}
-                        Lead time: {}""",
+                        End at: {},
+                        Lead time: {} ms""",
                 totalClientProcessed,
                 totalProfileCreated,
-                totalProfileUpdated,
                 totalNoteProcessed,
                 totalNoteCreated,
                 totalNoteUpdated,
                 startAt,
                 endAt,
-                Duration.between(startAt, endAt).getSeconds()
+                Duration.between(startAt, endAt).toMillis()
         );
     }
 

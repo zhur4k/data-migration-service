@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @Setter
@@ -17,6 +19,9 @@ public class PatientProfile {
     private String firstName;
 
     private String lastName;
+
+    @Column(nullable = false)
+    private LocalDate dob;
 
     @Column(nullable = false)
     private Short statusId;
